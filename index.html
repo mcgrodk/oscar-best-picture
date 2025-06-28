@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<head>
+    <title>Oscar Best Picture winners</title>
+    <meta charset="utf-8">
+    <link rel=stylesheet href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div id="container">
+        <h1>Academy Award for Best Picture winners</h1>
+        <div id="filters">
+            <span><strong>Filter by:</strong></span>
+            <label for="year">Year</label>
+            <select name="year" id="select-year">
+                <option value="null" selected>---</option>
+            </select>
+            <label for="genre">Genre</label>
+            <select name="genre" id="select-genre">Select genre
+                <option value="null" selected>---</option>
+            </select>
+            <label for="director">Director</label>
+            <select name="director" id="select-director">Select director
+                <option value="null" selected>---</option>
+            </select>
+            <button id="clear-btn">Clear filters</button>
+        </div>
+        <div id="film-cards">
+        </div>
+    </div>
+</body>
