@@ -1,9 +1,6 @@
 // TODO: Need a way for any change to a dropdown selection to call a function that updates
 // display based on all three filter criteria
 
-// TODO: Need to refactor making of director dropdown so that select value is name forward
-// but dropdown display has names listed alphabetically by last
-
 const selectYear = document.getElementById("select-year")
 const selectGenre = document.getElementById("select-genre")
 const selectDirector = document.getElementById("select-director");
@@ -642,6 +639,15 @@ selectGenre.addEventListener("change", function() {
   })
 })
 
+selectDirector.addEventListener("change", function() {
+  const filmDivs = document.querySelectorAll(".film-card");
+  filmDivs.forEach(div => {
+    if (div.innerHTML.includes(`${selectDirector.value}`)) {
+      div.style.display = "block";
+    } else div.style.display = "none";
+  })            
+})
+
 clearBtn.addEventListener("click", clearFilters);
 
 // Adds an option in year dropdown for each year in films array
@@ -683,23 +689,18 @@ for (let i = 0; i < films.length; i++) {
   } else directorsArr.push(films[i].director);
 }
 
-let directorsSorted = [];
-for (let i = 0; i < directorsArr.length; i++) {
-  let nameSplit = directorsArr[i].split(" ");
-  // Checks if director has a middle name/initial when name is listed
-  if (nameSplit.length > 2) {
-    directorsSorted.push(`${nameSplit[2]}, ${nameSplit[0]} ${nameSplit[1]}`);
-   // All directors without middle name/initial are simply listed as "Lastname, Firstname"
-  } else {
-    nameSplit.reverse();
-    directorsSorted.push(nameSplit.join(", "));
-}
-directorsSorted.sort();
-}
+// Sorts array by taking one name at a time, slicing out each last name, then comparing alphabetically to another
+directorsArr.sort((a, b) => {
+  const lastA = a.split(" ").slice(-1)[0].toLowerCase();
+  const lastB = b.split(" ").slice(-1)[0].toLowerCase();
+  return lastA.localeCompare(lastB);
+});
 
-// NOTE: This loop sets the value of each select to "lastname, firstname," which is not wanted; fix this later by refactoring the director list with functions
-directorsSorted.forEach(name => {
-  selectDirector.innerHTML += `<option value=${name}">${name}</option>`;
+directorsArr.forEach(name => {
+  let nameSplit = name.split(" ");
+  if (nameSplit.length === 3) {
+    selectDirector.innerHTML += `<option value="${name}">${nameSplit[2]}, ${nameSplit[0]} ${nameSplit[1]}</option>`;
+  } else selectDirector.innerHTML += `<option value="${name}">${nameSplit[1]}, ${nameSplit[0]}</option>`
 })
 
 createFilmCards();
