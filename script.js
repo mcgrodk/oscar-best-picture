@@ -1,14 +1,8 @@
-// TODO: Need a way for any change to a dropdown selection to call a function that updates
-// display based on all three filter criteria
-
 const selectYear = document.getElementById("select-year")
 const selectGenre = document.getElementById("select-genre")
 const selectDirector = document.getElementById("select-director");
 const clearBtn = document.getElementById("clear-btn");
 const filmCards = document.getElementById("film-cards");
-let yearValue;
-let genreValue;
-let directorValue;
 
 const films = [
   {
@@ -595,87 +589,80 @@ const films = [
   }
 ]
 
-function createFilmCards() {
-  films.forEach(film => {
+function createFilmCards(array) {
+  array.forEach(film => {
     const filmCard = document.createElement("div");
     filmCard.classList.add("film-card");
     filmCard.innerHTML += `<p>Title: ${film.title}</p>`;
     filmCard.innerHTML += `<p>Year: ${film.year}</p>`;
     filmCard.innerHTML += `<p>Genre: ${film.genre}</p>`;
-    filmCard.innerHTML += `<p>Director: ${film.director}</p>`;
+    if (Array.isArray(film.director)) {
+      // Adds space after comma if film has 2 directors
+      filmCard.innerHTML += `<p>Director: ${film.director[0]}, ${film.director[1]}</p>`
+    } else filmCard.innerHTML += `<p>Director: ${film.director}</p>`;
     filmCards.appendChild(filmCard);
   })
 }
 
-function updateDisplay(yearValue, genreValue, directorValue) {
+function updateDisplay() {
+  filmCards.innerHTML = "";
+  const yearValue = selectYear.value;
+  const genreValue = selectGenre.value;
+  const directorValue = selectDirector.value;
   
+  const filteredFilms = films.filter(film => {
+    // Make variables that check matches
+    const matchesYear = !yearValue || Number(yearValue) === film.year;
+    const matchesGenre = !genreValue || genreValue === film.genre;
+    const matchesDirector = !directorValue || (
+      Array.isArray(film.director) 
+      ? film.director.includes(directorValue) 
+      : directorValue === film.director
+      );
+    return matchesYear && matchesGenre && matchesDirector;
+  });
+  createFilmCards(filteredFilms);
 }
 
 function clearFilters() {
   filmCards.innerHTML = "";
-  selectYear.value = "null";
-  selectGenre.value = "null";
-  selectDirector.value = "null";
-  createFilmCards();
+  selectYear.value = "";
+  selectGenre.value = "";
+  selectDirector.value = "";
+  createFilmCards(films);
 }
 
-// Not optimal event listener, clears content rather than properly filtering
-selectYear.addEventListener("change", function() {
-  const filmDivs = document.querySelectorAll(".film-card");
-  filmDivs.forEach(div => {
-    if (div.innerHTML.includes(`${selectYear.value}`)) {
-      div.style.display = "block";
-    } else div.style.display = "none";
-  })
-})
-
-// Not optimal event listener, clears content rather than properly filtering
-selectGenre.addEventListener("change", function() {
-  const filmDivs = document.querySelectorAll(".film-card");
-  filmDivs.forEach(div => {
-    if (div.innerHTML.includes(`${selectGenre.value}`)) {
-      div.style.display = "block";
-    } else div.style.display = "none";
-  })
-})
-
-selectDirector.addEventListener("change", function() {
-  const filmDivs = document.querySelectorAll(".film-card");
-  filmDivs.forEach(div => {
-    if (div.innerHTML.includes(`${selectDirector.value}`)) {
-      div.style.display = "block";
-    } else div.style.display = "none";
-  })            
-})
-
+selectYear.addEventListener("change", updateDisplay);
+selectGenre.addEventListener("change", updateDisplay);
+selectDirector.addEventListener("change", updateDisplay);
 clearBtn.addEventListener("click", clearFilters);
 
-// Adds an option in year dropdown for each year in films array
+// Builds "Year" dropdown menu
 let yearsArr = []
 for (let i = 0; i < films.length; i++) {
-  // Ensures that each year only appears once in dropdown since there are multiple winning films released in certain years
+  /* Ensures that each year only appears once in dropdown since there are multiple 
+   winning films released in certain years */
     if (yearsArr.includes(films[i].year)) {
       continue;
     } else yearsArr.push(films[i].year);
   }
-
 yearsArr.forEach(year => {
   selectYear.innerHTML += `<option value="${year}">${year}</option>`
 })
 
-//Add option in genre dropdown for every unique genre in films array
+// Builds "Genre" dropdown menu
 let genresArr = []
 for (let i = 0; i < films.length; i++) {
   if (genresArr.includes(films[i].genre)) {
     continue;
   } else genresArr.push(films[i].genre);
 }
-
-//Add all genres in alphabetical order to Genre filter dropdown
+// Alphabetizes genres before adding to dropdown
 genresArr.sort().forEach(genre => {
   selectGenre.innerHTML += `<option value="${genre}">${genre}</option>`
 })
 
+// Builds "Director" dropdown menu
 directorsArr = [];
 for (let i = 0; i < films.length; i++) {
   if (directorsArr.includes(films[i].director)) {
@@ -689,7 +676,8 @@ for (let i = 0; i < films.length; i++) {
   } else directorsArr.push(films[i].director);
 }
 
-// Sorts array by taking one name at a time, slicing out each last name, then comparing alphabetically to another
+/* Sorts array by taking one name at a time, slicing out each last name, 
+then comparing alphabetically to another */
 directorsArr.sort((a, b) => {
   const lastA = a.split(" ").slice(-1)[0].toLowerCase();
   const lastB = b.split(" ").slice(-1)[0].toLowerCase();
@@ -703,4 +691,4 @@ directorsArr.forEach(name => {
   } else selectDirector.innerHTML += `<option value="${name}">${nameSplit[1]}, ${nameSplit[0]}</option>`
 })
 
-createFilmCards();
+createFilmCards(films);
